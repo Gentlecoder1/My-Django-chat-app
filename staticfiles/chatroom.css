@@ -1,0 +1,114 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #ffffff;
+}
+
+.chat-container {
+  width: 100%;
+  max-width: 600px;
+  height: 90vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.chat-header {
+  background-color: #6a11cb;
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  color: #ffffff;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  max-width: 75%;
+  padding: 10px 15px;
+  border-radius: 8px;
+  position: relative;
+  display: inline-block;
+}
+
+.received {
+  align-self: flex-start;
+  background-color: #e9ecef;
+}
+
+.sent {
+  align-self: flex-end;
+  background-color: #d1e7ff;
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  gap: 15px;
+  color: #555;
+}
+
+.msg-body {
+  font-size: 1rem;
+  color: #333;
+  word-wrap: break-word;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px 15px;
+  border-top: 1px solid #ccc;
+  background-color: #f8f9fa;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  outline: none;
+  margin-right: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+}
+
+.chat-input button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: #6a11cb;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.chat-input button:hover {
+  background-color: #4e0e9e;
+  transform: translateY(-2px);
+}
