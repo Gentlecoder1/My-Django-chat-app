@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: django-chatapp
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn chatapp.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: chatapp.settings
