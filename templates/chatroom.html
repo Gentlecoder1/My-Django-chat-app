@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Room - ChatConnect</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="{% static 'chatroom.css' %}" />
+  </head>
+  <body>
+    <div class="chat-container">
+      <header class="chat-header">
+        <h2>Room: {{ room_name }}</h2>
+      </header>
+
+      <main class="chat-messages" id="messages">
+        <!-- <div class="message received">
+          <div class="msg-header">
+            <span class="username">{{ username }}</span>
+            <span class="timestamp">10:02 AM</span>
+          </div>
+          <p class="msg-body">Hello everyone! 👋</p>
+        </div>
+
+        <div class="message sent">
+          <div class="msg-header">
+            <span class="username">{{ username }}</span>
+            <span class="timestamp">10:03 AM</span>
+          </div>
+          <p class="msg-body">Hi Alice! Welcome to the chat.</p>
+        </div> -->
+      </main>
+
+      <form class="chat-input" id="chat-form">
+        {% csrf_token %}
+        <input
+          type="hidden"
+          name="username"
+          id="username"
+          value="{{ username }}"
+        />
+        <input
+          type="hidden"
+          name="room_id"
+          id="room_id"
+          value="{{ chatroom_details.id }}"
+        />
+        <input
+          type="text"
+          name="message"
+          id="message"
+          placeholder="Type your message..."
+          required
+        />
+        <button type="submit" value="send">Send</button>
+      </form>
+    </div>
+  </body>
+
+  <script type="text/javascript">
+    function renderMessages(messages, currentUsername) {
+      const $messages = $("#messages");
+      $messages.empty();
+      messages.forEach(function (msg) {
+        const isSent = msg.username === currentUsername;
+        const msgClass = isSent ? "sent" : "received";
+        $messages.append(`
+          <div class="message ${msgClass}">
+            <div class="msg-header">
+              <span class="username">${msg.username}</span>
+              <span class="timestamp">${msg.timestamp}</span>
+            </div>
+            <p class="msg-body">${msg.message}</p>
+          </div>
+        `);
+      });
+      $messages.scrollTop($messages[0].scrollHeight);
+    }
+
+    function fetchMessages() {
+      $.ajax({
+        type: "GET",
+        url: "/messages",
+        data: {
+          room_id: $("#room_id").val(),
+        },
+        success: function (data) {
+          // data should be a JSON array of messages
+          console.log("Fetched messages:", data);
+          renderMessages(data.messages, $("#username").val());
+        },
+        error: function (xhr, status, error) {
+          console.log("Fetch error:", status, error, xhr.responseText);
+        },
+      });
+    }
+
+    $(document).on("submit", "#chat-form", function (e) {
+      e.preventDefault();
+      const messageVal = $("#message").val();
+      $.ajax({
+        type: "POST",
+        url: "/send",
+        data: {
+          username: $("#username").val(),
+          room_id: $("#room_id").val(),
+          message: messageVal,
+          csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
+        },
+        error: function (xhr, status, error) {
+          console.log("AJAX error:", status, error, xhr.responseText);
+          alert("Error: " + xhr.responseText);
+        },
+      });
+      document.getElementById("message").value = "";
+    });
+
+    // Initial fetch and polling
+    $(document).ready(function () {
+      fetchMessages();
+      setInterval(fetchMessages, 2000); // Poll every 2 seconds
+    });
+  </script>
+</html>

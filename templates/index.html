@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatConnect</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1 class="app-name">ChatConnect</h1>
+        <p class="subtitle">Connect instantly. Anywhere, anytime.</p>
+
+        <form action="{% url 'checkview' %}" method="POST" class="chat-form">
+          {% csrf_token %}
+          <input
+            type="text"
+            name="room_name"
+            placeholder="Enter Chat Room Name"
+            required
+          />
+          <input
+            type="text"
+            name="username"
+            placeholder="Enter Your Username"
+            required
+          />
+          <button type="submit">Create or Join Room</button>
+        </form>
+      </div>
+    </div>
+  </body>
+  <script>
+    console.log("Room:", "{{ chatroom }}");
+    console.log("User:", "{{ username }}");
+  </script>
+</html>
