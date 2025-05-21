@@ -63,67 +63,44 @@
   </body>
 
   <script type="text/javascript">
-    function renderMessages(messages, currentUsername) {
-      const $messages = $("#messages");
-      $messages.empty();
-      messages.forEach(function (msg) {
-        const isSent = msg.username === currentUsername;
-        const msgClass = isSent ? "sent" : "received";
-        $messages.append(`
-          <div class="message ${msgClass}">
-            <div class="msg-header">
-              <span class="username">${msg.username}</span>
-              <span class="timestamp">${msg.timestamp}</span>
-            </div>
-            <p class="msg-body">${msg.message}</p>
-          </div>
-        `);
-      });
-      $messages.scrollTop($messages[0].scrollHeight);
-    }
+    const roomName = "{{ room_name }}";
+    const username = document.getElementById("username").value;
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const chatSocket = new WebSocket(
+      wsScheme + "://" + window.location.host + "/ws/chat/" + roomName + "/"
+    );
 
-    function fetchMessages() {
-      $.ajax({
-        type: "GET",
-        url: "/messages",
-        data: {
-          room_id: $("#room_id").val(),
-        },
-        success: function (data) {
-          // data should be a JSON array of messages
-          console.log("Fetched messages:", data);
-          renderMessages(data.messages, $("#username").val());
-        },
-        error: function (xhr, status, error) {
-          console.log("Fetch error:", status, error, xhr.responseText);
-        },
-      });
-    }
+    chatSocket.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      const $messages = $("#messages");
+      const isSent = data.username === username;
+      const msgClass = isSent ? "sent" : "received";
+      $messages.append(`
+        <div class="message ${msgClass}">
+          <div class="msg-header">
+            <span class="username">${data.username || "Anonymous"}</span>
+            <span class="timestamp">${data.timestamp || ""}</span>
+          </div>
+          <p class="msg-body">${data.message}</p>
+        </div>
+      `);
+      $messages.scrollTop($messages[0].scrollHeight);
+    };
+
+    chatSocket.onclose = function (e) {
+      console.error("Chat socket closed unexpectedly");
+    };
 
     $(document).on("submit", "#chat-form", function (e) {
       e.preventDefault();
       const messageVal = $("#message").val();
-      $.ajax({
-        type: "POST",
-        url: "/send",
-        data: {
-          username: $("#username").val(),
-          room_id: $("#room_id").val(),
+      chatSocket.send(
+        JSON.stringify({
           message: messageVal,
-          csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
-        },
-        error: function (xhr, status, error) {
-          console.log("AJAX error:", status, error, xhr.responseText);
-          alert("Error: " + xhr.responseText);
-        },
-      });
+          username: username,
+        })
+      );
       document.getElementById("message").value = "";
-    });
-
-    // Initial fetch and polling
-    $(document).ready(function () {
-      fetchMessages();
-      setInterval(fetchMessages, 2000); // Poll every 2 seconds
     });
   </script>
 </html>
