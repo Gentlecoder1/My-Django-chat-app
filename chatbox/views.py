@@ -4,6 +4,7 @@ from .models import ChatRoom, Message  # Import the correct model
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 import json
+from django.views.decorators.http import require_GET
 
 # Create your views here. 
 def index(request):
@@ -12,7 +13,15 @@ def index(request):
 
 def chatroom(request, room_name):
     username = request.GET.get('username')
-    chatroom_details = ChatRoom.objects.get(name=room_name)
+    try:
+        chatroom_details = ChatRoom.objects.get(name=room_name)
+    except ChatRoom.DoesNotExist:
+        return render(request, 'chatroom.html', {
+            'username': username,
+            'room_name': room_name,
+            'chatroom_details': None,
+            'error': f'Room "{room_name}" does not exist.'
+        })
     return render(request, 'chatroom.html', {
         'username': username,
         'room_name': room_name,
@@ -71,3 +80,19 @@ def getmsg(request):
         return JsonResponse({'messages': messages_list})
     else:
         return JsonResponse({"error": "Invalid request method"}, status=400)
+
+@require_GET
+def fetch_messages(request, room_name):
+    print(f"Fetching messages for room: {room_name}")  # Debug print
+    messages = Message.objects.filter(room=room_name).order_by('date')
+    print(f"Found {messages.count()} messages in DB for this room.")  # Debug print
+    data = [
+        {
+            'username': msg.user,
+            'message': msg.content,
+            'timestamp': msg.date.strftime('%I:%M %p')
+        }
+        for msg in messages
+    ]
+    print(f"Returning messages: {data}")  # Debug print
+    return JsonResponse({'messages': data})

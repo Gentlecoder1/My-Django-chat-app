@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chatbox',  # Your chat application
-    'channels',  # Added for WebSocket support
 ]
 
 MIDDLEWARE = [
@@ -57,9 +56,6 @@ TEMPLATES = [
         },
     },
 ]
-
-# Use ASGI instead of WSGI for Channels
-ASGI_APPLICATION = 'chatapp.asgi.application'
 
 WSGI_APPLICATION = 'chatapp.wsgi.application'
 
@@ -114,22 +110,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',  # Directory for static files
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Channel layers configuration (in-memory for development)
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
-# For production, use Redis:
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             'hosts': [('127.0.0.1', 6379)],
-#         },
-#     },
-# }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

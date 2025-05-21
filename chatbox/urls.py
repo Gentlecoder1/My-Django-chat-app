@@ -7,4 +7,5 @@ urlpatterns = [
     path('<str:room_name>/', views.chatroom, name='chatroom'),
     path('send', views.send, name='send'),
     path('messages', views.getmsg, name='getmsg'),  
+    path('messages/<str:room_name>/', views.fetch_messages, name='fetch_messages'),
 ]

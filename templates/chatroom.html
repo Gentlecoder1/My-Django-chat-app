@@ -63,44 +63,65 @@
   </body>
 
   <script type="text/javascript">
-    const roomName = "{{ room_name }}";
-    const username = document.getElementById("username").value;
-    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-    const chatSocket = new WebSocket(
-      wsScheme + "://" + window.location.host + "/ws/chat/" + roomName + "/"
-    );
-
-    chatSocket.onmessage = function (e) {
-      const data = JSON.parse(e.data);
+    function renderMessages(messages, currentUsername) {
       const $messages = $("#messages");
-      const isSent = data.username === username;
-      const msgClass = isSent ? "sent" : "received";
-      $messages.append(`
-        <div class="message ${msgClass}">
-          <div class="msg-header">
-            <span class="username">${data.username || "Anonymous"}</span>
-            <span class="timestamp">${data.timestamp || ""}</span>
+      $messages.empty();
+      messages.forEach(function (msg) {
+        const isSent = msg.username === currentUsername;
+        const msgClass = isSent ? "sent" : "received";
+        $messages.append(`
+          <div class="message ${msgClass}">
+            <div class="msg-header">
+              <span class="username">${msg.username}</span>
+              <span class="timestamp">${msg.timestamp}</span>
+            </div>
+            <p class="msg-body">${msg.message}</p>
           </div>
-          <p class="msg-body">${data.message}</p>
-        </div>
-      `);
+        `);
+      });
       $messages.scrollTop($messages[0].scrollHeight);
-    };
+    }
 
-    chatSocket.onclose = function (e) {
-      console.error("Chat socket closed unexpectedly");
-    };
+    function fetchMessages() {
+      $.ajax({
+        type: "GET",
+        url: "/messages",
+        data: {
+          room_id: $("#room_id").val(),
+        },
+        success: function (data) {
+          renderMessages(data.messages, $("#username").val());
+        },
+        error: function (xhr, status, error) {
+          console.log("Fetch error:", status, error, xhr.responseText);
+        },
+      });
+    }
 
     $(document).on("submit", "#chat-form", function (e) {
       e.preventDefault();
       const messageVal = $("#message").val();
-      chatSocket.send(
-        JSON.stringify({
+      $.ajax({
+        type: "POST",
+        url: "/send",
+        data: {
+          username: $("#username").val(),
+          room_id: $("#room_id").val(),
           message: messageVal,
-          username: username,
-        })
-      );
+          csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
+        },
+        error: function (xhr, status, error) {
+          console.log("AJAX error:", status, error, xhr.responseText);
+          alert("Error: " + xhr.responseText);
+        },
+      });
       document.getElementById("message").value = "";
+    });
+
+    // Initial fetch and polling
+    $(document).ready(function () {
+      fetchMessages();
+      setInterval(fetchMessages, 2000); // Poll every 2 seconds
     });
   </script>
 </html>
